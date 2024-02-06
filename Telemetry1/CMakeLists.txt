@@ -4,11 +4,13 @@ project(Telemetry1 VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS SerialPort)
+find_package(Qt6 REQUIRED COMPONENTS Charts)
 
 qt_standard_project_setup()
 
-#set(CMAKE_AUTOMOC ON)
-#set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 qt_add_executable(appTelemetry1
@@ -21,6 +23,7 @@ qt_add_qml_module(appTelemetry1
     VERSION 1.0
     QML_FILES Main.qml
     RESOURCES Resources.qrc
+    SOURCES Libraries/serialhandler.h Libraries/serialhandler.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -35,7 +38,13 @@ set_target_properties(appTelemetry1 PROPERTIES
 )
 
 target_link_libraries(appTelemetry1
-    PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick
+    PRIVATE
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::SerialPort
+    Qt6::Charts
 )
 
 include(GNUInstallDirs)

@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Layouts
+import QtCharts
+import SerialHandler
 
 Window {
     // Basic properties
@@ -101,6 +103,12 @@ Window {
                                     ColorAnimation { duration: 200 }
                         }
                     }
+                    // On click configure a new instance of serial handler and open serial port
+                    onClicked: {
+                        console.log(baudRateBox.currentText)
+                        SerialHandler.configurePort(baudRateBox.currentText, "COM4")
+                        SerialHandler.openPort(0);
+                    }
                 }
             }
         }
@@ -131,8 +139,9 @@ Window {
                     RowLayout{
                         anchors.fill: parent
 
-                        // MENU title
+                        // MAIN TITLE
                         Text{
+                            id: mainTitle
                             anchors.horizontalCenter: parent.horizontalCenter
                             // Position text in top center
                             text: "TELEMETRY"
@@ -168,27 +177,82 @@ Window {
                         fillMode: Image.PreserveAspectCrop
                     }
 
+                    // Date text
+                    Text{
+                        id: dateText
+                        anchors.left: weatherImg.right
+                        anchors.leftMargin: 20
+                        anchors.top: parent.top
+                        anchors.topMargin: 12
+                        text: Date().toString().slice(0, 10)  // Javacript
+                        font.family: "Tahoma"
+                        font.pointSize: 12
+                        font.bold: false
+                        color: "white"
+                    }
+
+                    // Time text
                     Text{
                         id: timeText
                         anchors.left: weatherImg.right
-                        anchors.leftMargin: 15
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "hh/mm/ss"
+                        anchors.leftMargin: 12
+                        anchors.top: dateText.bottom
+                        anchors.topMargin: 3
+                        text: ""
                         font.family: "Tahoma"
                         font.pointSize: 15
                         font.bold: false
                         color: "white"
                     }
                 }
+
+                ChartView{
+                    id:plot1
+                    title: "Voltage over Time"
+                    anchors.top: upperBarRect.bottom
+                    anchors.topMargin: 15
+                    anchors.right: parent.right
+                    anchors.rightMargin: 15
+                    Layout.preferredHeight: 300
+                    Layout.preferredWidth: 550
+                    antialiasing: true
+
+                    LineSeries{
+                        name: "Voltage (V)"
+                        XYPoint {x:0; y:0}
+                        XYPoint {x:1; y:1}
+                    }
+                }
+
             }
         }
     }
 
+    Connections{
+        target: SerialHandler
+        onErrorOccurred: {
+            console.log("Error: ", errorMessage)
+        }
+
+        onNewDataReceived: {
+            console.log("New data received: ", data)
+        }
+    }
+
+    // Insert things to do after parent (main window) is created
+    Component.onCompleted: {
+
+    }
+
     // Timer to keep app updated
     Timer{
-        interval: 500
+        interval: 1000
         running: true
         repeat: true
-        onTriggered: timeText.text = Date().toString()
+
+        // Things to keep updated
+        onTriggered: {
+            timeText.text = Date().toString().split(" ")[3]   // Javascript
+        }
     }
 }
