@@ -28,12 +28,13 @@ void SerialHandler::handleError(void){
 // Handles incoming data and emits a signal containing it in QString format
 void SerialHandler::newDataHandler(){
     if(this->readLine()){
+        //
         emit newDataReceived(QString::fromUtf8(*data));
         data->clear();
     }
 }
 
-// Configuring functions
+// Configuring function
 void SerialHandler::configurePort(QString baudRate, const QString portName){
     serialPort->setBaudRate(baudRates[baudRate]);
     serialPort->setPortName(portName);

@@ -13,6 +13,9 @@ Window {
     color: Material.backgroundColor
     title: qsTr("Test 1")
 
+    // Variable to keep track of Time
+    property int elapsedTime: 0
+
     RowLayout{
         anchors.fill: parent   // Fill the window (parent) With this row layout in all directions
         spacing: 0  // Spacing in px between items in layout
@@ -207,7 +210,7 @@ Window {
                 }
 
                 ChartView{
-                    id:plot1
+                    id: plot1
                     title: "Voltage over Time"
                     anchors.top: upperBarRect.bottom
                     anchors.topMargin: 15
@@ -217,31 +220,81 @@ Window {
                     Layout.preferredWidth: 550
                     antialiasing: true
 
+                    // Control properties
+                    property var voltagePoints: []
+                    property double maxVoltage: 0.0
+                    property double minVoltage: 0.0
+
+                    // Axis
+                    ValuesAxis{
+                        id: plot1X
+                        min: 0
+                        max: 1
+                    }
+
+                    ValuesAxis{
+                        id: plot1Y
+                        min: 0
+                        max: 1
+                    }
+
                     LineSeries{
+                        id: voltageLineSeries
                         name: "Voltage (V)"
-                        XYPoint {x:0; y:0}
-                        XYPoint {x:1; y:1}
+                        axisX: plot1X
+                        axisY: plot1Y
+                    }
+
+                    // JAVASCRIPT FUNCTIONS PLOT 1
+                    // Keep track of each point in the graph
+                    function addDataPoint(x, y){
+                        voltagePoints.push({x: x, y: y});
+                        voltageLineSeries.append(x, y);
+                    }
+
+                    function removeFirstDataPoint(){
+                        voltagePoints.shift();          // Remove first element from javascript array
+                        voltageLineSeries.remove(0)     // Remove from plot
+                    }
+
+                    // Update axis of the plot
+                    function updateAxis(xMax, xMin, yMax, yMin){
+                        plot1X.max = xMax
+                        plot1X.min = xMin
+                        plot1Y.max = yMax
+                        plot1Y.min = yMin
                     }
                 }
-
             }
         }
     }
 
+    // SERIAL HANDLER EVENTS
     Connections{
         target: SerialHandler
-        onErrorOccurred: {
-            console.log("Error: ", errorMessage)
+        onErrorOccurred: function(errorMessage){
+            console.log("Error: ", errorMessage);
         }
+        onNewDataReceived: function(data) {
+            //console.log("New data received: ", data);
+            var voltage = parseFloat(data);
 
-        onNewDataReceived: {
-            console.log("New data received: ", data)
+            // Update maximum and minimum voltages for establishing axis limits
+            if(voltage > plot1.maxVoltage){
+                plot1.maxVoltage = voltage;
+            }
+            if(voltage < plot1.minVoltage){
+                plot1.minVoltage = voltage;
+            }
+
+            plot1.addDataPoint(elapsedTime, voltage);
+
+            while(voltageLineSeries.count >= 50){
+                plot1.removeFirstDataPoint();
+            }
+
+            plot1.updateAxis(elapsedTime, plot1.voltagePoints[0].x, plot1.maxVoltage, plot1.minVoltage)
         }
-    }
-
-    // Insert things to do after parent (main window) is created
-    Component.onCompleted: {
-
     }
 
     // Timer to keep app updated
@@ -252,6 +305,7 @@ Window {
 
         // Things to keep updated
         onTriggered: {
+            elapsedTime += 1
             timeText.text = Date().toString().split(" ")[3]   // Javascript
         }
     }
