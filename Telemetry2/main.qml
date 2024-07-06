@@ -29,7 +29,7 @@ Window {
         z: 0
         // Rows and columns
         columns: 10
-        rows: 10
+        rows: 20
         // Specify gaps between the rows and columns
         property int xSpacing: 4  // column spacing
         property int ySpacing: 0  // row spacing
@@ -41,7 +41,7 @@ Window {
         Item{
             id: topPanel
             property int columnSpanTop: 10
-            property int rowSpanTop: 1
+            property int rowSpanTop: 2
 
             Layout.columnSpan: columnSpanTop
             Layout.rowSpan: rowSpanTop
@@ -66,7 +66,7 @@ Window {
         Item{
             id: midPanel
             property int columnSpanMid: 10
-            property int rowSpanMid: 8
+            property int rowSpanMid: 17
 
             Layout.columnSpan: columnSpanMid
             Layout.rowSpan: rowSpanMid
@@ -116,21 +116,21 @@ Window {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         radius: 10
-                        color: "white"
+                        color: "#181818"
                     }
 
                     Rectangle{
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         radius: 10
-                        color: "white"
+                        color: "#181818"
                     }
 
                     Rectangle{
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         radius: 10
-                        color: "white"
+                        color: "#181818"
                     }
                 }
             }

@@ -11,14 +11,18 @@ Item {
        property int menuWidth: 350              // Adjust side menu width as needed
 
        id: sideMenuRect
-       color: "#181818"
-       radius: 7
        visible: false // Not visible unless triggered via button
        z: 1           // Ensure it is above the middle panel
        // Adjust size and position
-       height: parent.height - topPanel.height
+       height: parent.height - topPanel.height - 5
        width: menuWidth
-       x: 0; y: topPanel.height
+       x: 0; y: topPanel.height + 5
+       // Define color and appearance
+       color: "#181818"
+       opacity: 0.97
+       radius: 5
+       border.color: "#d0d0d0"
+       border.width: 1
        // Set an initial state
        state: "enabled"
    }

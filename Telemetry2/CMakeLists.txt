@@ -21,7 +21,12 @@ qt_add_qml_module(appTelemetry2
     RESOURCES Resources.qrc
     RESOURCES TopPanel.qml
     RESOURCES MiddleLayout.qml
+    RESOURCES MidPanel1.qml
+    RESOURCES GaugePanel.qml
+    RESOURCES Gauge1.qml
     RESOURCES SideMenu.qml
+    RESOURCES RotationPanel.qml
+
     RESOURCES Gubi.png
 )
 
