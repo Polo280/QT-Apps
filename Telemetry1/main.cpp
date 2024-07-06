@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
+    // Expose to qml c++ classes
     qmlRegisterSingletonType<SerialHandler>("SerialHandler", 1, 0, "SerialHandler", serialHandlerSingletonProvider);
 
     QQmlApplicationEngine engine;

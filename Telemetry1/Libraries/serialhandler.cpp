@@ -42,7 +42,9 @@ void SerialHandler::configurePort(QString baudRate, const QString portName){
 
 // Open port
 void SerialHandler::openPort(int mode){
-    serialPort->open(serialMode[mode]);
+    if(serialPort->open(serialMode[mode])){
+        emit connected();
+    }
 }
 
 // Serial Read & store into buffer
@@ -56,10 +58,11 @@ bool SerialHandler::isConnected(void){
     return serialPort->isOpen();
 }
 
-// Close port
+// Close port and emit onDisconnected signal
 void SerialHandler::closePort(void){
     if(serialPort->isOpen()){
         serialPort->close();
+        emit disconnected();
     }
 }
 

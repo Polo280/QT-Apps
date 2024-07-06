@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
 find_package(Qt6 REQUIRED COMPONENTS SerialPort)
 find_package(Qt6 REQUIRED COMPONENTS Charts)
-
 qt_standard_project_setup()
 
 set(CMAKE_AUTOMOC ON)
@@ -24,6 +23,10 @@ qt_add_qml_module(appTelemetry1
     QML_FILES Main.qml
     RESOURCES Resources.qrc
     SOURCES Libraries/serialhandler.h Libraries/serialhandler.cpp
+    SOURCES
+
+    QML_FILES
+        QmlFiles/BasicPlot.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

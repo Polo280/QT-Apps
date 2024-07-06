@@ -1,3 +1,5 @@
 <RCC>
-    <qresource prefix="/"/>
+    <qresource prefix="/">
+        <file>QmlFiles/BasicPlot.qml</file>
+    </qresource>
 </RCC>

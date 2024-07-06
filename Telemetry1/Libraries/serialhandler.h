@@ -33,6 +33,8 @@ public:
     Q_INVOKABLE bool isConnected(void);
 
 signals:
+    void connected(void);
+    void disconnected(void);
     void newDataReceived(QString data);
     void errorOccurred(QString errorMessage);
 
