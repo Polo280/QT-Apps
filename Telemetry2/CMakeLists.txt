@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.2 REQUIRED COMPONENTS Quick)
 find_package(Qt6 5.15 REQUIRED COMPONENTS Location)
 find_package(Qt6 REQUIRED COMPONENTS Positioning)
+find_package(Qt6 REQUIRED COMPONENTS Charts)
 
 qt_add_executable(appTelemetry2
     main.cpp
@@ -24,10 +25,16 @@ qt_add_qml_module(appTelemetry2
     RESOURCES MidPanel1.qml
     RESOURCES GaugePanel.qml
     RESOURCES Gauge1.qml
+    RESOURCES PlotPanel.qml
     RESOURCES SideMenu.qml
     RESOURCES RotationPanel.qml
+    RESOURCES MapHandler.qml
+    RESOURCES MapPanel.qml
+
+    RESOURCES mainAuxFunctions.js
 
     RESOURCES Gubi.png
+    RESOURCES Thermometer.png
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -45,6 +52,7 @@ target_link_libraries(appTelemetry2
     PRIVATE Qt6::Quick
     Qt6::Location
     Qt6::Positioning
+    Qt6::Charts
 )
 
 include(GNUInstallDirs)

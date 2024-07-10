@@ -10,6 +10,7 @@ import QtLocation 5.15
 import QtPositioning 5.15
 // Custom QMLs
 import "."  // Include same folder (imports are managed with folders)
+// JS Files
 
 Window {
     /////// BASIC WINDOW PROPERTIES ///////
@@ -20,6 +21,23 @@ Window {
     color: "#272727"
     title: qsTr("ELYOS Telemetry")
 
+    ////// Define App Variables //////
+    // Time control
+    property int timeRunningAttempt: 0
+    property int timeRunning: 0
+    property bool timePaused: true
+    property bool finishedRace: false
+    // Race settings
+    property int maxNumberLaps: 5
+    property int attemptAvailableSecs: 620
+    // Current Status
+    property int remainingTime: attemptAvailableSecs
+    property int lapTimeAux: 0
+    property int currentLaps: 0
+
+    ////// Define Signals //////
+    signal resetAttemptTrigger()
+
     ///////////// GRID LAYOUT /////////////
     GridLayout{
         // Specify adjustment in parent item (window)
@@ -29,7 +47,7 @@ Window {
         z: 0
         // Rows and columns
         columns: 10
-        rows: 20
+        rows: 40
         // Specify gaps between the rows and columns
         property int xSpacing: 4  // column spacing
         property int ySpacing: 0  // row spacing
@@ -41,7 +59,7 @@ Window {
         Item{
             id: topPanel
             property int columnSpanTop: 10
-            property int rowSpanTop: 2
+            property int rowSpanTop: 4
 
             Layout.columnSpan: columnSpanTop
             Layout.rowSpan: rowSpanTop
@@ -54,11 +72,15 @@ Window {
                 radius: 7
                 color: "#181818"
 
-                // This can be removed from children:
+                ////// TOP PANEL ITEM //////
                 TopPanel{
-                    // TOP PANEL ITEM //
                     id: topPanelItem
+                    // Properties to display attempt status
+                    attemptCurrentLaps: currentLaps
+                    attemptRemainingSecs: remainingTime
+                    // Manage side menu bar visibility
                     onMenuButtonClicked: sideMenuBar.state = (sideMenuBar.state === "disabled")? "enabled" : "disabled"
+
                 }
             }
         }
@@ -66,7 +88,7 @@ Window {
         Item{
             id: midPanel
             property int columnSpanMid: 10
-            property int rowSpanMid: 17
+            property int rowSpanMid: 34
 
             Layout.columnSpan: columnSpanMid
             Layout.rowSpan: rowSpanMid
@@ -80,8 +102,52 @@ Window {
                 radius: 7
                 color: "#181818"
 
+                ///// Middle layout item /////
                 MiddleLayout{
-                    ///// Middle layout item /////
+                    id: midLayout
+                    // Update properties
+                    lapCurrent: currentLaps; // Get the current lap
+                    runningTimeAttempt: timeRunningAttempt;  // Attempt run time
+                    predictedTimePerLap: (timeRunningAttempt === 0)? 0 : Math.ceil(remainingTime / (maxNumberLaps - currentLaps))
+
+                    // Signals from map panel //
+                    // Pause behavior
+                    onMapPauseButtonClicked: {
+                        timePaused = !timePaused;
+                        if(finishedRace){
+                            finishedRace = false;
+                        }
+                    }
+                    // New lap behavior
+                    onMapLapButtonClicked: {
+                        // Has only effect when timer is not paused
+                        if(!timePaused && !finishedRace){
+                            // Evaluate current lap to decide if finish race
+                            if(currentLaps > 3){
+                                finishedRace = true;
+                            }
+
+                            avgSecsPerLap = (timeRunningAttempt === 0)? 0 : Math.ceil(timeRunningAttempt / (currentLaps + 1));
+                            //// Map panel (bottom) ////
+                            // Update the boolean array of which laps are completed
+                            var newLapsCompleted = lapsCompleted.slice(); // Create a copy of the array
+                            newLapsCompleted[lapCurrent] = true;
+                            lapsCompleted = newLapsCompleted; // Reassign to trigger update
+
+                            // Update current lap time to complete
+                            var newLapTimesSecs = lapTimesSecs.slice(); // Create a copy of the array
+                            newLapTimesSecs[lapCurrent] = timeRunningAttempt - lapTimeAux;
+                            lapTimesSecs = newLapTimesSecs; // Reassign to trigger update
+                            lapTimeAux = timeRunningAttempt;  // Update aux to store the time of each individual lap
+
+                            // Update current laps
+                            currentLaps = (currentLaps < maxNumberLaps)? currentLaps + 1 : maxNumberLaps;
+                        }
+                    }
+                    // Reset behavior
+                    onMapResetButtonClicked: {
+                        resetAttemptTrigger()   // Handler to reset in this file
+                    }
                 }
             }
         }
@@ -90,7 +156,7 @@ Window {
         Item{
             id: bottomPanel
             property int columnSpanBottom: 10
-            property int rowSpanBottom: 1
+            property int rowSpanBottom: 2
 
             Layout.columnSpan: columnSpanBottom
             Layout.rowSpan: rowSpanBottom
@@ -140,9 +206,15 @@ Window {
     ///////////// SIDE MENU ITEM /////////////
     SideMenu{
         id: sideMenuBar
+        // Handle exit button clicked
+        onExitButtonClicked: Qt.quit()
+        // Disable Default layout
+        onSomethingClicked: midLayout.visible = false
+        // Handle according to signal
+        onMainPageButtonClicked: midLayout.visible = true
     }
 
-    ///////////// Timer1 /////////////
+    ///////////// Timer1 (1000 ms)  /////////////
     Timer {
         id: timer1
         interval: 1000  // 1000 milliseconds = 1 second
@@ -152,7 +224,27 @@ Window {
         onTriggered: {
             // Update the text display with the current time
             var date = new Date();
-            topPanelItem.hourText = Qt.formatTime(date, "hh:mm:ss")
+            topPanelItem.hourText = Qt.formatTime(date, "hh:mm:ss");
+            // App total run time update
+            timeRunning += 1;
+            // Remaining time update (if not paused)
+            if(!timePaused && !finishedRace){
+                timeRunningAttempt += 1;
+                remainingTime = (remainingTime === 0)? 0 : remainingTime - 1;
+            }
         }
+    }
+
+    /////// RESET ATTEMPT HANDLER ///////
+    onResetAttemptTrigger: {
+        finishedRace = false;
+        currentLaps = 0;
+        timeRunningAttempt = 0;
+        remainingTime = attemptAvailableSecs;
+        midLayout.avgSecsPerLap = 0;
+        // Map panel bottom
+        midLayout.lapsCompleted = [false, false, false, false, false]
+        midLayout.lapTimesSecs = [0, 0, 0, 0, 0]
+        lapTimeAux = 0; // Auxiliar in this file
     }
 }

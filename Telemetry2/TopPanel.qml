@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import "qrc:/jsFiles/mainAuxFunctions.js" as AuxFunctionsJs
 
 ///////////// Top Panel QML /////////////
 Rectangle {
@@ -9,6 +10,8 @@ Rectangle {
     signal menuButtonClicked()
     // Item properties
     property string hourText: "00:00:00"
+    property int attemptRemainingSecs: 0
+    property int attemptCurrentLaps: 0
 
     // Properties of main rectangle for panel
     border.color: "#d0d0d0"
@@ -21,7 +24,7 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 10
         // Rows and columns
-        columns: 20
+        columns: 40
         rows: 4
         // Specify gaps between the rows and columns
         property int xSpacing: 2  // column spacing
@@ -32,7 +35,7 @@ Rectangle {
 
         ///////////// SIDE MENU BUTTON /////////////
         Item{
-            property int columnSpanMenuButton: 1
+            property int columnSpanMenuButton: 2
             property int rowSpanMenuButton: 4
 
             Layout.columnSpan: columnSpanMenuButton
@@ -71,7 +74,7 @@ Rectangle {
 
         ///////////// Hour/Date Text /////////////
         Rectangle{
-            property int columnSpanDate: 3
+            property int columnSpanDate: 6
             property int rowSpanDate: 4
 
             Layout.columnSpan: columnSpanDate
@@ -121,7 +124,7 @@ Rectangle {
 
         ///////////// Empty Space /////////////
         Item{
-            property int columnSpanEmpty: 13
+            property int columnSpanEmpty: 22
             property int rowSpanEmpty: 4
 
             Layout.columnSpan: columnSpanEmpty
@@ -137,9 +140,37 @@ Rectangle {
             }
         }
 
+        /////////// Thermometer Image ///////////
+        // Rectangle{
+        //     property int columnSpanTempImg: 1
+        //     property int rowSpanTempImg: 4
+
+        //     Layout.preferredWidth: ((parent.width / parent.columns) * columnSpanTempImg) - parent.columnSpacing
+        //     Layout.preferredHeight: ((parent.height / parent.rows) * rowSpanTempImg) - parent.rowSpacing
+        //     radius: 5
+        //     color: "#181818"
+        //     border.color: "White"
+
+        //     Image{
+        //         anchors.fill: parent
+        //         source: "qrc:/Images/Thermometer.png"
+        //     }
+        // }
+
+        // Rectangle{
+        //     property int columnSpanTemp: 2
+        //     property int rowSpanTemp: 4
+
+        //     Layout.preferredWidth: ((parent.width / parent.columns) * columnSpanTemp) - parent.columnSpacing
+        //     Layout.preferredHeight: ((parent.height / parent.rows) * rowSpanTemp) - parent.rowSpacing
+        //     radius: 5
+        //     color: "#181818"
+        //     border.color: "White"
+        // }
+
         ///////////// Lap Control  /////////////
         Item{
-            property int columnSpanLaps: 3
+            property int columnSpanLaps: 6
             property int rowSpanLaps: 4
 
             Layout.columnSpan: columnSpanLaps
@@ -148,7 +179,7 @@ Rectangle {
             Layout.preferredWidth: ((parent.width / parent.columns) * columnSpanLaps) - parent.columnSpacing
             Layout.preferredHeight: ((parent.height / parent.rows) * rowSpanLaps) - parent.rowSpacing
 
-            ///// LAPS /////
+            /////// Current lap text ///////
             ColumnLayout{
                 anchors.fill: parent
                 anchors.margins: 2
@@ -157,28 +188,46 @@ Rectangle {
                 Item{
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+
                     Text{
                         x: 15
-                        text: "CURRENT LAP: 3"
+                        text: "CURRENT LAP: " + attemptCurrentLaps
                         font.pointSize: 12
                         font.bold: true
                         color: "white"
                     }
                 }
 
+                //////// Remaining time text ////////
                 Item{
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+
                     Text{
+                        id: remainingTimeText
                         x: 15
-                        text: "REMAINING TIME: 30:50"
+                        text: "REMAINING TIME: " + AuxFunctionsJs.formatTime(attemptRemainingSecs)
 
                         font.pointSize: 12
                         font.bold: true
-                        color: "white"
+                        color: "White"
                     }
-                }
+                }  
             }
         }
     }
+
+    // Change the color of remaining Time label
+    onAttemptRemainingSecsChanged: {
+            // Logic to change the color based on remaining seconds
+            if(attemptRemainingSecs >= 600){
+                remainingTimeText.color =  "Green";
+            }else if (attemptRemainingSecs >= 300){
+                remainingTimeText.color = "#fad20c";
+            }else if (attemptRemainingSecs > 0){
+                remainingTimeText.color = "Red";
+            }else{
+               remainingTimeText.color = "White";
+            }
+        }
 }

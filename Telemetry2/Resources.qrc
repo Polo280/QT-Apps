@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/Images">
         <file>Gubi.png</file>
+        <file>Thermometer.png</file>
     </qresource>
     <qresource prefix="/qmlFiles">
         <file>TopPanel.qml</file>
@@ -10,5 +11,11 @@
         <file>MidPanel1.qml</file>
         <file>GaugePanel.qml</file>
         <file>Gauge1.qml</file>
+        <file>MapHandler.qml</file>
+        <file>MapPanel.qml</file>
+        <file>PlotPanel.qml</file>
+    </qresource>
+    <qresource prefix="/jsFiles">
+        <file>mainAuxFunctions.js</file>
     </qresource>
 </RCC>
